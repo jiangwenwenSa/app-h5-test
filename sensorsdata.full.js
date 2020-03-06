@@ -1497,6 +1497,7 @@ _.URL = function(url) {
   };
   if (typeof window.URL === 'function' && isURLAPIWorking()) {
     result = new URL(url);
+    console.log(JSON.stringify(result));
   } else {
     var _regex = /^https?:\/\/.+/;
     if(_regex.test(url) === false) {
