@@ -169,13 +169,9 @@ if(typeof JSON!=='object'){JSON={}}(function(){'use strict';var rx_one=/^[\],:{}
     }
   };
 
-_.hasAttribute = function(ele, attr) {
-  if (ele.hasAttribute) {
-    return ele.hasAttribute(attr);
-  } else {
-    return !!(ele.attributes[attr] && ele.attributes[attr].specified);
-  }
-};
+
+
+
 
 _.filter = function (arr, fn, self) {
   var hasOwn = Object.prototype.hasOwnProperty;
@@ -1498,6 +1494,16 @@ _.URL = function(url) {
   if (typeof window.URL === 'function' && isURLAPIWorking()) {
     result = new URL(url);
     console.log(JSON.stringify(result));
+    if (!result.searchParams) {
+      result.searchParams = (function(){
+        var params = _.getURLSearchParams(result.search);
+        return {
+          get: function(searchParam) {
+            return params[searchParam];
+          }
+        };
+      })();
+    }
   } else {
     var _regex = /^https?:\/\/.+/;
     if(_regex.test(url) === false) {
@@ -2440,7 +2446,7 @@ sd.debug = {
       if((typeof target === 'object') && target.tagName){
         var tagName = target.tagName.toLowerCase();
         var parent_ele = target.parentNode.tagName.toLowerCase();
-        if (tagName !== 'button' && tagName !== 'a' && parent_ele !== 'a' && parent_ele !== 'button' && tagName !== 'input' && tagName !== 'textarea' && !_.hasAttribute(target, 'data-sensors-click')) {
+        if (tagName !== 'button' && tagName !== 'a' && parent_ele !== 'a' && parent_ele !== 'button' && tagName !== 'input' && tagName !== 'textarea') {
           heatmap.start(null,target,tagName, props, callback);
         }
       }
@@ -4266,7 +4272,7 @@ var saNewUser = {
 
         var parent_ele = target.parentNode;
 
-        if(tagName === 'a' || tagName === 'button' || tagName === 'input' || tagName === 'textarea' || _.hasAttribute(target, 'data-sensors-click')){
+        if(tagName === 'a' || tagName === 'button' || tagName === 'input' || tagName === 'textarea'){
           that.start(ev, target, tagName);
         }else if(parent_ele.tagName.toLowerCase() === 'button' || parent_ele.tagName.toLowerCase() === 'a'){
           that.start(ev, parent_ele, target.parentNode.tagName.toLowerCase());
