@@ -34,15 +34,12 @@
       y.parentNode.insertBefore(x, y);
     }
   })({
-  //sdk_url: 'https://cdn.jsdelivr.net/npm/sa-sdk-javascript@1.14.22/sensorsdata.min.js',
-  sdk_url: './sensorsdata.full.js',
+  sdk_url: 'https://cdn.jsdelivr.net/npm/sa-sdk-javascript@1.14.22/sensorsdata.min.js',
   //sdk_url: 'https://869359954.github.io/sadefine/sensorsdata.full.js',
-  heatmap_url: './heatmap.full.js',
-  //heatmap_url: 'https://cdn.jsdelivr.net/npm/sa-sdk-javascript@1.14.21/heatmap.min.js',
+  heatmap_url: 'https://cdn.jsdelivr.net/npm/sa-sdk-javascript@1.14.21/heatmap.min.js',
   name: 'sa',
   //server_url: 'http://test-syg.datasink.sensorsdata.cn/sa?token=27f1e21b78daf376&project=jiangwenwen',
-  //server_url: 'https://test-syg.datasink.sensorsdata.cn/sa?project=jiangwenwen&token=27f1e21b78daf376',
-  server_url: 'https://sdktest.datasink.sensorsdata.cn/sa?project=wangyangyang&token=21f2e56df73988c7',
+  server_url: 'https://test-syg.datasink.sensorsdata.cn/sa?project=jiangwenwen&token=27f1e21b78daf376',
   use_app_track: true,
   //use_app_track_is_send: 0,
   heatmap:{
@@ -64,7 +61,7 @@
   },
   //batch_send:true,
   source_channel:['lixiang','kkkkk','jjjj'],
-  //send_type:'ajax',
+  send_type:'beacon',
   //use_app_track:true,
 //   preset_properties: {
 //     //是否采集$latest_utm最近一次广告系列相关参数，默认值true
