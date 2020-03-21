@@ -278,6 +278,9 @@ function selectStock(stockName){
 //window.onunload = function() { 
    //console.log("123aaa456");
    //};
+window.addEventListener('pagehide', function(event) {
+  sa.track('ViewTest', {name: 'Abc'})
+})
 </script>
 <textarea name="" id="" cols="30" rows="10">im textarea1</textarea>
 <textarea name="" id="" cols="30" rows="10">im textarea2</textarea>
