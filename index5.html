@@ -39,6 +39,7 @@
   </script>
   <script>
     var ua = navigator.userAgent;
+    var ua2 = navigator.userAgent.toLowerCase();
     var ipad = ua.match(/(iPad).* OS\s([\d _]+)/);
     var isAndroid = ua.indexOf('Android') > -1 || ua.indexOf('Adr') > -1; // android 终端 
     var isiOS = !!ua.match(/\(i[^;] +;(U;)？CPU.+ Mac OS X/);// ios 终端
@@ -50,9 +51,8 @@
       if (isAndroid) {
         // Android系统手机终端判断
         alert("android - 2");
-        var ua = window.navigator.userAgent.toLowerCase();
         // Android系统手机终端微信登录判断
-        if (ua.match(/MicroMessenger/i) == 'micromessenger') {
+        if (ua2.match(/MicroMessenger/i) == 'micromessenger') {
           alert("android - 2 - 微信 - 3.yes");
 
         } else {
@@ -63,9 +63,8 @@
       } else if (isiOS) {
         // ios系统手机终端登录判断
         alert("ios - 2");
-        var ua = window.navigator.userAgent.toLowerCase();
         // ios系统手机终端微信登录判断
-        if (ua.match(/MicroMessenger/i) == 'micromessenger') {
+        if (ua2.match(/MicroMessenger/i) == 'micromessenger') {
           alert("ios - 2 - 微信 - 3.yes");
 
         } else {
