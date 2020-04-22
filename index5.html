@@ -44,7 +44,6 @@
     var ipad = ua.match(/(iPad).* OS\s([\d _]+)/);
     var isAndroid = ua.indexOf('Android') > -1 || ua.indexOf('Adr') > -1; // android 终端 
     var isIOS = !!ua.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
-    var isMobile = isIOS || isAndroid;
 
     if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) {
       //移动端判断
@@ -55,10 +54,8 @@
         // Android系统手机终端微信登录判断
         if (ua2.match(/MicroMessenger/i) == "micromessenger") {
           alert("android - 微信");
-
         } else {
           alert("android - 非微信");
-
         }
 
       } else if (isIOS) {
@@ -67,7 +64,6 @@
         // ios系统手机终端微信登录判断
         if (ua2.match(/MicroMessenger/i) == "micromessenger") {
           alert("ios - 微信");
-
         } else {
           alert("ios - 非微信");
         }
@@ -78,7 +74,6 @@
     } else {
       //电脑PC端判断
       alert("PC端 - 1");
-
     }
   </script>
 </head>
