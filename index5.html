@@ -44,7 +44,7 @@
     var ipad = ua.match(/(iPad).* OS\s([\d _]+)/);
     var isAndroid = ua.indexOf('Android') > -1 || ua.indexOf('Adr') > -1; // android 终端 
     var isIOS = !!ua.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
-    var isMobile = isiOS || isAndroid;
+    var isMobile = isIOS || isAndroid;
 
     if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) {
       //移动端判断
@@ -61,7 +61,7 @@
 
         }
 
-      } else if (isiOS) {
+      } else if (isIOS) {
         // ios系统手机终端登录判断
         alert("ios - 2");
         // ios系统手机终端微信登录判断
