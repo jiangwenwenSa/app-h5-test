@@ -1,0 +1,111 @@
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="charset=UTF-8">
+
+  <title>UA 测试</title>
+  <script>
+    (function (para) {
+      var p = para.sdk_url, n = para.name, w = window, d = document, s = 'script', x = null, y = null;
+      if (typeof (w['sensorsDataAnalytic201505']) !== 'undefined') {
+        return false;
+      }
+      w['sensorsDataAnalytic201505'] = n;
+      w[n] = w[n] || function (a) { return function () { (w[n]._q = w[n]._q || []).push([a, arguments]); } };
+      var ifs = ['track', 'quick', 'register', 'registerPage', 'registerOnce', 'trackSignup', 'trackAbtest', 'setProfile', 'setOnceProfile', 'appendProfile', 'incrementProfile', 'deleteProfile', 'unsetProfile', 'identify', 'login', 'logout', 'trackLink', 'clearAllRegister', 'getAppStatus'];
+      for (var i = 0; i < ifs.length; i++) {
+        w[n][ifs[i]] = w[n].call(null, ifs[i]);
+      }
+      if (!w[n]._t) {
+        x = d.createElement(s), y = d.getElementsByTagName(s)[0];
+        x.async = 1;
+        x.src = p;
+        x.setAttribute('charset', 'UTF-8');
+        w[n].para = para;
+        y.parentNode.insertBefore(x, y);
+      }
+    })({
+      sdk_url: 'https://cdn.jsdelivr.net/npm/sa-sdk-javascript@1.14.24/sensorsdata.min.js',
+      heatmap_url: 'https://cdn.jsdelivr.net/npm/sa-sdk-javascript@1.14.24/heatmap.min.js',
+      name: 'sensors',
+      server_url: 'http://test-syg.datasink.sensorsdata.cn/sa?token=27f1e21b78daf376&project=jiangwenwen',
+      heatmap: {
+        clickmap: 'default',
+        scroll_notice_map: 'default',
+      }
+    });
+  </script>
+  <script>
+    var ua = navigator.userAgent;
+    var ipad = ua.match(/(iPad).* OS\s([\d _]+)/);
+    var isAndroid = ua.indexOf('Android') > -1 || ua.indexOf('Adr') > -1; // android 终端 
+    var isiOS = !!ua.match(/\(i[^;] +;(U;)？CPU.+ Mac OS X/);// ios 终端
+    var isMobile = isiOS || isAndroid;
+
+    if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) {
+      //移动端判断
+      alert("移动端 - 1");
+      if (isAndroid) {
+        // Android系统手机终端判断
+        alert("android - 2");
+        var ua = window.navigator.userAgent.toLowerCase();
+        // Android系统手机终端微信登录判断
+        if (ua.match(/MicroMessenger/i) == 'micromessenger') {
+          alert("android - 2 - 微信 - 3.yes");
+
+        } else {
+          alert("android - 2 - 微信 - 3.no");
+
+        }
+
+      } else if (isiOS) {
+        // ios系统手机终端登录判断
+        alert("ios - 2");
+        var ua = window.navigator.userAgent.toLowerCase();
+        // ios系统手机终端微信登录判断
+        if (ua.match(/MicroMessenger/i) == 'micromessenger') {
+          alert("ios - 2 - 微信 - 3.yes");
+
+        } else {
+          alert("ios - 2 - 非微信 - 3.no");
+        }
+      } else {
+        //移动端其它系统登录：如塞班系统手机（其它系统手机可能不常见了）
+        alert("移动电脑” -2");
+      }
+    } else {
+      //电脑PC端判断
+      alert("PC端 - 1");
+
+    }
+  </script>
+</head>
+
+<body>
+
+  <input type="text" placeholder="输入搜索关键词" id="keyWord" />
+  <button type="button" id="sosuo" data="test">搜索</button>
+
+  <div id="div">我是DIV2</div>
+
+  <button id="tijiao">提交</button>
+
+  <input type="text" value="填写内容" id="tianxie" />填写
+
+  <select name="省份" id="shengfen">
+    <option value="0">北京</option>
+    <option value="1">上海</option>
+    <option value="2">合肥</option>
+  </select>
+
+  <button data2="test2">测试</button>
+  <div data2="test22" id="wenzi2">测试</div>
+  <div data2="test22" id="wenzi22">测试</div>
+
+
+  <p style="height:1000px"></p>
+</body>
+
+</html>
