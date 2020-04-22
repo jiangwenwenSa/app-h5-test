@@ -49,41 +49,36 @@
     if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) {
       //移动端判断
       alert("移动端 - 1");
-      console.log("移动端 - 1");
       if (isAndroid) {
         // Android系统手机终端判断
         alert("android 手机");
-console.log("android 手机");
         // Android系统手机终端微信登录判断
         if (ua2.match(/MicroMessenger/i) == "micromessenger") {
           alert("android - 微信");
-console.log("android - 微信");
+
         } else {
           alert("android - 非微信");
-console.log("android - 非微信");
+
         }
 
       } else if (isIOS) {
         // ios系统手机终端登录判断
         alert("ios 手机");
-        console.log("ios 手机");
         // ios系统手机终端微信登录判断
         if (ua2.match(/MicroMessenger/i) == "micromessenger") {
           alert("ios - 微信");
-console.log("ios - 微信");
+
         } else {
           alert("ios - 非微信");
-          console.log("ios - 非微信");
         }
       } else {
         //移动端其它系统登录：如塞班系统手机（其它系统手机可能不常见了）
         alert("android 和 iOS 以外移动端");
-        console.log("android 和 iOS 以外移动端");
       }
     } else {
       //电脑PC端判断
-      alert("PC端 - 1"); 
-console.log("PC端 - 1");
+      alert("PC端 - 1");
+
     }
   </script>
 </head>
