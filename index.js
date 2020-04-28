@@ -1,4 +1,3 @@
-
 var crossDomain = {};
 
 crossDomain.include = function(obj, target) {
@@ -16,6 +15,34 @@ crossDomain.include = function(obj, target) {
     }
   });
   return found;
+};
+
+crossDomain.getPart = function(part) {
+  var that = this,
+      temp = false;
+  var len = that.option.length;
+  if(len) {
+    for(var i = 0; i < len; i++) {
+      if(part.indexOf(that.option[i]['part_url']) > -1) {
+        return true;
+      }
+    }
+  }
+  return temp;
+};
+
+crossDomain.getPartHash = function(part) {
+  var that = this;
+  var len = that.option.length;
+  var temp = false;
+  if(len) {
+    for(var i = 0; i < len; i++) {
+      if(part.indexOf(that.option[i]['part_url']) > -1) {
+        return that.option[i]['after_hash'];
+      }
+    }
+  }
+  return !!temp;
 };
 
 crossDomain.getCurrenId = function() {
@@ -38,21 +65,29 @@ crossDomain.rewireteUrl = function(url, target) {
   var host = arr[1] || '',
       search = arr[2] || '',
       hash = arr[3] || '';
-  var idIndex = url.indexOf('_sa_sdk');
-  if(idIndex > -1) {
-    nurl = url.replaca(/(_sa_sdk=)([^&]*)/gi, '_sa_sdk=' + that.getCurrenId());
-  }
-  if(that.option.hash) {
+      var idIndex;
+  if(that.getPartHash(url)) {
+    idIndex = hash.indexOf('_sa_sdk');
     var queryIndex = hash.indexOf('?');
     if(queryIndex > -1) {
-      nurl = host + search + '#' + hash.substring(1) + '&_sa_sdk=' + that.getCurrenId();
+      if(idIndex > -1) {
+        nurl = host + search + '#' + hash.substring(1, idIndex) + '_sa_sdk=' + that.getCurrenId();
+      } else {
+        nurl = host + search + '#' + hash.substring(1) + '&_sa_sdk=' + that.getCurrenId();
+      }
     } else {
       nurl = host + search + '#' + hash.substring(1) + '?_sa_sdk=' + that.getCurrenId();
     }
   } else {
-    nurl = host + '?' + search.substring(1) + '&_sa_sdk=' + that.getCurrenId() + hash;
+    idIndex = search.indexOf('_sa_sdk');
+    if(idIndex > -1) {
+      nurl = host + '?' + search.substring(1, idIndex) + '_sa_sdk=' + that.getCurrenId() + hash;
+    } else {
+      nurl = host + '?' + search.substring(1) + '&_sa_sdk=' + that.getCurrenId() + hash;
+    }
   }
-  if(that._.isObject(target)) {
+
+  if(target) {
     target.href = nurl;
   }
   return nurl;
@@ -73,8 +108,8 @@ crossDomain.isSameDomain = function(url) {
 crossDomain.getUrlId = function() {
   var that = this;
   var location = document.location,
-      search = location.search,
-      hash = location.hash;
+      search = location.search.split('?')[1] || '',
+      hash = location.hash.split('?')[1] || '';
   var searchId = that.getUrlValue(search, '_sa_sdk') || '',
       hashId = that.getUrlValue(hash, '_sa_sdk') || '';
   return searchId ? decodeURIComponent(searchId) : decodeURIComponent(hashId);
@@ -92,26 +127,26 @@ crossDomain.getUrlValue = function(target, key) {
 
 crossDomain.setRefferId = function() {
   var that = this;
-  var reffer = that._.getReferrer();
-  // 先判断是否存在 first_id, 存在则表示当前域名使用的是登录 ID，则不对当前 ID 进行修改
-  if(!crossDomain.isSameDomain(reffer)){
-    var isAnonymousId = that.getUrlId().substring(0,1) === 'a',
-        urlId = that.getUrlId().substring(1);
-    if(urlId && isAnonymousId && that.store.getFirstId()) {
-      that._.saEvent.send({
-        original_id: urlId,
-        distinct_id: store.getDistinctId(),
-        type: 'track_signup',
-        event: '$SignUp',
-        properties: {}
-      }, null);
-    }
-    if(urlId && isAnonymousId && !that.store.getFirstId()) {
-      sd.identify(urlId, true);
-    }
-    if(urlId && !isAnonymousId && !that.store.getFirstId()) {
-      sd.login(urlId);
-    }
+  var distinct_id = that.store.getDistinctId();
+  var isAnonymousId = that.getUrlId().substring(0,1) === 'a',
+      urlId = that.getUrlId().substring(1);
+  if(urlId === distinct_id) {
+    return;
+  }
+  if(urlId && isAnonymousId && that.store.getFirstId()) {
+    that._.saEvent.send({
+      original_id: urlId,
+      distinct_id: distinct_id,
+      type: 'track_signup',
+      event: '$SignUp',
+      properties: {}
+    }, null);
+  }
+  if(urlId && isAnonymousId && !that.store.getFirstId()) {
+    that.sd.identify(urlId, true);
+  }
+  if(urlId && !isAnonymousId && !that.store.getFirstId()) {
+    that.sd.login(urlId);
   }
 };
 
@@ -121,11 +156,11 @@ crossDomain.addListen = function() {
     var target = event.target || event.srcElement || {};
     var nodeName = target.tagName;
     if(nodeName.toLowerCase() === "a" && target.href) {
-      var protocol = target.href.protocol;
-      var host = that._.getHostname(target.href);
-      if(protocol === 'http' || protocol === 'https' || that.include(that.option.domain, host)) {
-        if(!that.isSameDomain(host)) {
-          that.rewireteUrl(target, target.href);
+      var location = new URL(target.href);
+      var protocol = location.protocol;
+      if(protocol === 'http:' || protocol === 'https:') {
+        if(that.getPart(target.href)) {
+          that.rewireteUrl(target.href, target);
         }
       }
     }
@@ -133,13 +168,27 @@ crossDomain.addListen = function() {
 };
 
 crossDomain.init = function(sd, option) {
+  this.sd = sd;
   this._ = sd._;
   this.store = sd.store;
   this.para = sd.para;
   this.option = option;
-  if(this._.isArray(option.domain) && option.domain.length > 0) {
+  resolveOption(option);
+  if(this._.isArray(this.option) && this.option.length > 0) {
     this.setRefferId();
     this.addListen();
+  }
+  function resolveOption(option) {
+    var len = option.length,
+        arr = [];
+    for(var i = 0; i < len; i++) {
+      if(option[i].hasOwnProperty('part_url') && option[i].hasOwnProperty('after_hash')) {
+        arr.push(option[i]);
+      } else {
+        sd.log('配置的 option 格式不对，勤检查参数格式！');
+      }
+    }
+    option = arr;
   }
 };
 

@@ -169,9 +169,13 @@ if(typeof JSON!=='object'){JSON={}}(function(){'use strict';var rx_one=/^[\],:{}
     }
   };
 
-
-
-
+_.hasAttribute = function(ele, attr) {
+  if (ele.hasAttribute) {
+    return ele.hasAttribute(attr);
+  } else {
+    return !!(ele.attributes[attr] && ele.attributes[attr].specified);
+  }
+};
 
 _.filter = function (arr, fn, self) {
   var hasOwn = Object.prototype.hasOwnProperty;
@@ -1103,7 +1107,8 @@ _.cookie = {
       try {
         sub = _.URL(url).hostname;
       } catch (e) {
-        // do nothing
+        sd.log(e);
+
       }
       if(typeof sub === 'string' && sub !== ''){
         sub = 'sajssdk_2015_' + name_prefix + '_' + sub.replace(/\./g, '_');
@@ -1188,6 +1193,8 @@ _.localStorage = {
     try {
       storedValue = JSON.parse(_.localStorage.get(name)) || null;
     } catch (err) {
+      sd.log(err);
+
     }
     return storedValue;
   },
@@ -1278,6 +1285,8 @@ _.xhr = function(cors) {
         try {
           return new ActiveXObject('Microsoft.XMLHTTP')
         } catch (d) {
+          sd.log(d);
+
         }
       }
     }
@@ -1327,7 +1336,10 @@ _.ajax = function(para) {
        setTimeout(function(){
           g.abort();
         },para.timeout+500);
-     }catch(e2){};
+     }catch(e2){
+      sd.log(e2);
+
+     };
   };
 
   g.onreadystatechange = function() {
@@ -1371,7 +1383,10 @@ _.ajax = function(para) {
       }
 
     }
-  } catch (e) {};
+  } catch (e) {
+    sd.log(e);
+
+  };
 
   g.send(para.data || null);
 
@@ -1421,7 +1436,8 @@ _.getHostname = function(url, defaultValue) {
   try {
     hostname = _.URL(url).hostname;
   } catch (e) {
-    // do nothing
+    sd.log(e);
+
   }
   return hostname || defaultValue;
 };
@@ -1493,7 +1509,6 @@ _.URL = function(url) {
   };
   if (typeof window.URL === 'function' && isURLAPIWorking()) {
     result = new URL(url);
-    console.log(JSON.stringify(result));
     if (!result.searchParams) {
       result.searchParams = (function(){
         var params = _.getURLSearchParams(result.search);
@@ -2029,8 +2044,60 @@ _.autoExeQueue = function(){
     }
   };
 
+  _.eventEmitter = function(){
+    this._events = [];  
+    this.pendingEvents = [];
+  }
+  
+  _.eventEmitter.prototype = {
+     emit: function(type){
+        var args =[].slice.call(arguments,1);
 
+        _.each(this._events, function(val){
+          if( val.type !== type){
+            return;
+          }
+          val.callback.apply(val.context, args);
+        })
+     },
+     on: function(event, callback, context){
+       if(typeof callback !== 'function'){
+         return;
+       }
+       this._events.push({
+         type: event,
+         callback: callback,
+         context: context || this
+       });
+     },
+     tempAdd: function(event, data){
+        if(!data || !event){
+          return;
+        }
 
+        this.pendingEvents.push({
+          type: event,
+          data: data
+        });
+        this.pendingEvents.length > 20 ? this.pendingEvents.shift() : null;
+     },
+     isReady: function(){
+      var that = this;
+      this.tempAdd = this.emit;
+
+      if(this.pendingEvents.length === 0){
+        return;
+      }
+      _.each(this.pendingEvents, function(val){
+        that.emit(val.type, val.data);
+      })
+      
+      this.pendingEvents = [];
+
+     }
+
+  }
+  
 
 })();
 
@@ -2103,7 +2170,7 @@ sd.addReferrerHost = function(data) {
     if (data.properties.$first_referrer) {
       data.properties.$first_referrer_host = _.getHostname(data.properties.$first_referrer, defaultHost);
     }
-    if (data.type === "track") {
+    if (data.type === "track" || data.type === "track_signup") {
       if ('$referrer' in data.properties) {
         data.properties.$referrer_host = data.properties.$referrer === "" ? "" : _.getHostname(data.properties.$referrer, defaultHost);
       }
@@ -2115,10 +2182,10 @@ sd.addReferrerHost = function(data) {
 };
 
 sd.addPropsHook = function(data) {
-  if (sd.para.preset_properties && sd.para.preset_properties.url && data.type === "track" && typeof data.properties.$url === 'undefined') {
+  if (sd.para.preset_properties && sd.para.preset_properties.url && (data.type === "track" || data.type === "track_signup") && typeof data.properties.$url === 'undefined') {
     data.properties.$url = window.location.href;
   }
-  if (sd.para.preset_properties && sd.para.preset_properties.title && data.type === "track" && typeof data.properties.$title === 'undefined') {
+  if (sd.para.preset_properties && sd.para.preset_properties.title && (data.type === "track" || data.type === "track_signup") && typeof data.properties.$title === 'undefined') {
     data.properties.$title = document.title;
   }
 };
@@ -2144,10 +2211,10 @@ sd.initPara = function(para){
   }
   // 修复没有配置协议的问题，自动取当前页面的协议
   if(typeof sd.para.server_url === 'string' && sd.para.server_url.slice(0,3) === '://'){
-    sd.para.server_url = location.protocol + sd.para.server_url;
+    sd.para.server_url = location.protocol.slice(-1) + sd.para.server_url;
   }
   if(typeof sd.para.web_url === 'string' && sd.para.web_url.slice(0,3) === '://'){
-    sd.para.web_url = location.protocol + sd.para.web_url;
+    sd.para.web_url = location.protocol.slice(-1) + sd.para.web_url;
   }
 
   if(sd.para.send_type !== 'image' && sd.para.send_type !== 'ajax' && sd.para.send_type !== 'beacon'){
@@ -2255,7 +2322,7 @@ sd.setPreConfig = function(sa){
 
 sd.setInitVar= function(){
   sd._t = sd._t || 1 * new Date();
-  sd.lib_version = '1.14.22';
+  sd.lib_version = '1.15.1';
   sd.is_first_visitor = false;
   // 标准广告系列来源
   sd.source_channel_standard = 'utm_source utm_medium utm_campaign utm_content utm_term';
@@ -2446,7 +2513,7 @@ sd.debug = {
       if((typeof target === 'object') && target.tagName){
         var tagName = target.tagName.toLowerCase();
         var parent_ele = target.parentNode.tagName.toLowerCase();
-        if (tagName !== 'button' && tagName !== 'a' && parent_ele !== 'a' && parent_ele !== 'button' && tagName !== 'input' && tagName !== 'textarea') {
+        if (tagName !== 'button' && tagName !== 'a' && parent_ele !== 'a' && parent_ele !== 'button' && tagName !== 'input' && tagName !== 'textarea' && !_.hasAttribute(target, 'data-sensors-click')) {
           heatmap.start(null,target,tagName, props, callback);
         }
       }
@@ -2579,9 +2646,35 @@ sd.debug = {
         // 优先使用临时属性
         return sd.store._state._first_id || sd.store._state.first_id || sd.store._state._distinct_id || sd.store._state.distinct_id;
       }
+    },
+    setPlugin: function(para){
+      if(!_.isObject(para)){
+        return false;
+      }
+//      sd.pluginTempFunction = sd.pluginTempFunction || {};
+      _.each(para, function(v,k){
+        if(_.isFunction(v)){
+//          sd.pluginTempFunction[k] = v;
+          if(_.isObject(window.SensorsDataWebJSSDKPlugin) && window.SensorsDataWebJSSDKPlugin[k]){
+            v(window.SensorsDataWebJSSDKPlugin[k]);
+//            delete sd.pluginTempFunction[k];
+          }else {
+            sd.log(k + '没有获取到,请查阅文档，调整'+ k +'的引入顺序！')
+          }
+        }
+      });
     }
-
-
+    /*,
+    pluginIsReady: function(para){
+      // sdk先加载，popup后加载调用 quick('pluginIsReady',{name:popup,self:this})
+      if(!sd.pluginTempFunction || !_.isObject(para) || !_.isFunction(para.name)){
+        return false;
+      }
+      if(sd.pluginTempFunction[para.name]){
+        sd.pluginTempFunction[para.name](para.self);
+        delete sd.pluginTempFunction[para.name];        
+      }
+    }*/
   };
 
   // 一些常见的方法
@@ -2676,7 +2769,7 @@ sd.debug = {
         if (_.isString(value)) {
           p[key] = [value];
         } else if (_.isArray(value)) {
-
+          p[key] = value;
         } else {
           delete p[key];
           sd.log('appendProfile属性的值必须是字符串或者数组');
@@ -2762,10 +2855,11 @@ sd.debug = {
     }
     var firstId = store.getFirstId();
     if (typeof id === 'undefined') {
+      var uuid = _.UUID();
       if(firstId){
-        store.set('first_id', _.UUID());
+        store.set('first_id', uuid);
       }else{
-        store.set('distinct_id', _.UUID());
+        store.set('distinct_id', uuid);
       }
     } else if (saEvent.check({distinct_id: id})) {
       if (isSave === true) {
@@ -2781,7 +2875,7 @@ sd.debug = {
           store.change('distinct_id', id);
         }
       }
-
+      
     } else {
       sd.log('identify的参数必须是字符串');
     }
@@ -2899,10 +2993,12 @@ sd.debug = {
     if(firstId){
       store.set('first_id','');
       if(isChangeId === true){
-        store.set('distinct_id',_.UUID());
+        var uuid = _.UUID();
+        store.set('distinct_id',uuid);
       }else{
         store.set('distinct_id',firstId);
       }
+      
     }else{
       sd.log('没有first_id，logout失败');
     }
@@ -2936,6 +3032,27 @@ sd.debug = {
     }
     return result;
   };
+/*
+  sd.noticePluginIsReady = function(){
+    if(_.isObject(window.SensorsDataWebJSSDKPlugin)){
+      _.each(window.SensorsDataWebJSSDKPlugin, function(v,k){
+        if((_.isObject(v) || _.isFunction(v)) && _.isFunction(v['setWebSDKReady'])){
+          v['setWebSDKReady']();
+        }  
+      });
+    }
+  };
+*/
+
+
+
+
+
+
+
+
+
+
 
 
 /*
@@ -3246,6 +3363,7 @@ dataSend.beacon.prototype.start = function(){
 
 var sendState = {};
 sd.sendState = sendState;
+sd.events = new _.eventEmitter();
 // 发送队列
 sendState.queue = _.autoExeQueue();
 
@@ -3277,6 +3395,8 @@ sendState.getSendCall = function(data, config, callback) {
     config: config,
     callback: callback
   };
+  
+  sd.events.tempAdd('send',originData);
 
   if(!sd.para.use_app_track && sd.para.batch_send && localStorage.length < 200){
     sd.log(originData);
@@ -3317,7 +3437,9 @@ sendState.getSendCall = function(data, config, callback) {
           try{
             hostname = _.URL(sd.para.server_url).hostname;
             project = _.URL(sd.para.server_url).searchParams.get('project') || 'default';
-          }catch(e){};
+          }catch(e){
+            sd.log(e);
+          };
           if (hostname && hostname === match[0] && project && project === match[1]) {
             iframe = document.createElement('iframe');
             iframe.setAttribute('src', 'sensorsanalytics://trackEvent?event=' + encodeURIComponent(JSON.stringify(_.extend({server_url:sd.para.server_url},originData))));
@@ -3408,6 +3530,7 @@ sendState.pushSend = function(data){
 
 
 var saEvent = {};
+_.saEvent = saEvent;
 
 saEvent.checkOption = {
   // event和property里的key要是一个合法的变量名，由大小写字母、数字、下划线和$组成，并且首字符不能是数字。
@@ -3695,6 +3818,9 @@ cookie的数据存储
       },
       set: function(name, value) {
         this._state = this._state || {};
+        if(name === 'distinct_id' && this._state.distinct_id){
+          sd.events.tempAdd('changeDistinctId',value);
+        }
         this._state[name] = value;
         // 如果set('first_id') 或者 set('distinct_id')，删除对应的临时属性
         if (name === 'first_id') {
@@ -3703,6 +3829,7 @@ cookie的数据存储
           delete this._state._distinct_id;
         }
         this.save();
+        
       },
       // 针对当前页面修改
       change: function(name, value) {
@@ -3774,7 +3901,7 @@ cookie的数据存储
         try {
           sub = _.URL(location.href).hostname;
         } catch (e) {
-          // do nothing.
+          sd.log(e);
         }
         if(typeof sub === 'string' && sub !== ''){
           sub = 'sa_jssdk_2015_' + sub.replace(/\./g, '_');
@@ -3997,7 +4124,7 @@ var saNewUser = {
         sd.errorMsg = '您SDK没有配置开启点击图，可能没有数据！';
       }
       if(web_url && web_url[0] && web_url[1]){
-        if(web_url[1].slice(0,5) === 'http:' && location.protocol === 'https'){
+        if(web_url[1].slice(0,5) === 'http:' && location.protocol === 'https:'){
           sd.errorMsg = '您的当前页面是https的地址，神策分析环境也必须是https！';
         }
       }
@@ -4272,7 +4399,7 @@ var saNewUser = {
 
         var parent_ele = target.parentNode;
 
-        if(tagName === 'a' || tagName === 'button' || tagName === 'input' || tagName === 'textarea'){
+        if(tagName === 'a' || tagName === 'button' || tagName === 'input' || tagName === 'textarea' || _.hasAttribute(target, 'data-sensors-click')){
           that.start(ev, target, tagName);
         }else if(parent_ele.tagName.toLowerCase() === 'button' || parent_ele.tagName.toLowerCase() === 'a'){
           that.start(ev, parent_ele, target.parentNode.tagName.toLowerCase());
@@ -4463,6 +4590,7 @@ sd.init = function(para){
     sd.store.init();
 
     sd.readyState.setState(3);
+//    sd.noticePluginIsReady();
     // 发送数据
     if(sd._q && _.isArray(sd._q) && sd._q.length > 0 ){
       _.each(sd._q, function(content) {
@@ -4482,7 +4610,9 @@ _.each(methods, function(method) {
     if (!sd.readyState.getState()) {
       try {
         console.error('请先初始化神策JS SDK');
-      } catch (e) {}
+      } catch (e) {
+        sd.log(e);
+      }
       return;
     }
     return oldFunc.apply(sd, arguments);
@@ -4495,8 +4625,8 @@ if (typeof window['sensorsDataAnalytic201505'] === 'string'){
   //异步或者同步
   sd.setPreConfig(window[sensorsDataAnalytic201505]);
   window[sensorsDataAnalytic201505] = sd;
-  sd.init();
   window['sensorsDataAnalytic201505'] = sd;
+  sd.init();  
 } else if (typeof window['sensorsDataAnalytic201505'] === 'undefined'){
   //module模式，或者webpack打包
   window['sensorsDataAnalytic201505'] = sd;
@@ -4511,7 +4641,10 @@ if (typeof window['sensorsDataAnalytic201505'] === 'string'){
 
 }catch(err){
   if (typeof console === 'object' && console.log) {
-    try {console.log(err)} catch (e) {};
+    try {console.log(err)} catch (e) {
+      sd.log(e);
+
+    };
   }
 }
 
