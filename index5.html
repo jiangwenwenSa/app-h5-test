@@ -29,8 +29,9 @@
   <script src="./index.js"></script>
   <script>
     sensors.modules.cross_domain.init(sensors, [
-     { part_url: '', after_hash: false }
-    ])
+     { part_url: 'localhost:8080/index2.html', after_hash: false }
+    ]);
+    sensors.quick('autoTrack');
   </script>
   <script>
     var ua = navigator.userAgent;
@@ -80,7 +81,7 @@
 
   <div id="div">我是DIV2</div>
 
-  <a href="https://www.baidu.com/" >跳转到 百度</a>
+  <a href="http://localhost:8080/index2.html" >跳转到 百度</a>
 
   <button id="tijiao">提交</button>
 
