@@ -2691,6 +2691,11 @@ sd.debug = {
     }
   };
 
+  // 调用 modules 插件的 init 方法
+  sd.use = function(name, option) {
+    sd.modules[name].init(sd, option);
+  };
+
 
   /*
    * @param {string} event

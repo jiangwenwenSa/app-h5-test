@@ -86,7 +86,7 @@ crossDomain.rewireteUrl = function(url, target) {
       nurl = host + '?' + search.substring(1) + '&_sa_sdk=' + that.getCurrenId() + hash;
     }
   }
-
+  
   if(target) {
     target.href = nurl;
   }
@@ -177,15 +177,17 @@ crossDomain.init = function(sd, option) {
   if(this._.isArray(this.option) && this.option.length > 0) {
     this.setRefferId();
     this.addListen();
+  } else {
+    sd.log('part_url 配置不正确，请重新配置 part_url！');
   }
   function resolveOption(option) {
     var len = option.length,
         arr = [];
     for(var i = 0; i < len; i++) {
-      if(option[i].hasOwnProperty('part_url') && option[i].hasOwnProperty('after_hash')) {
+      if(option[i]['part_url'] && option[i].hasOwnProperty('after_hash')) {
         arr.push(option[i]);
       } else {
-        sd.log('配置的 option 格式不对，勤检查参数格式！');
+        sd.log('配置的 url 格式不对，请检查参数格式！');
       }
     }
     option = arr;
