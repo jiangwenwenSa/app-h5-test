@@ -7,25 +7,62 @@
 
   <title>跨域打通 测试</title>
   <script>
-    (function (para) {
-      if (typeof (window['sensorsDataAnalytic201505']) !== 'undefined') {
+    // (function (para) {
+    //   if (typeof (window['sensorsDataAnalytic201505']) !== 'undefined') {
+    //     return false;
+    //   }
+    //   window['sensorsDataAnalytic201505'] = para.name;
+    //   window[para.name] = {
+    //     para: para
+    //   };
+    // })({
+    //   name: 'sensors',
+    //   server_url: 'http://test-syg.datasink.sensorsdata.cn/sa?token=27f1e21b78daf376&project=jiangwenwen',
+    //   heatmap_url: "https://cdn.jsdelivr.net/npm/sa-sdk-javascript@1.14.24/heatmap.min.js",
+    //   heatmap: {
+    //     clickmap: 'default',
+    //     scroll_notice_map: 'default'
+    //   }
+    // });
+    (function(para) {
+    var p = para.sdk_url, n = para.name, w = window, d = document, s = 'script',x = null,y = null;
+    if(typeof(w['sensorsDataAnalytic201505']) !== 'undefined') {
         return false;
-      }
-      window['sensorsDataAnalytic201505'] = para.name;
-      window[para.name] = {
-        para: para
-      };
-    })({
-      name: 'sensors',
-      server_url: 'http://test-syg.datasink.sensorsdata.cn/sa?token=27f1e21b78daf376&project=jiangwenwen',
-      heatmap_url: "https://cdn.jsdelivr.net/npm/sa-sdk-javascript@1.14.24/heatmap.min.js",
-      heatmap: {
-        clickmap: 'default',
-        scroll_notice_map: 'default'
-      }
-    });
+    }
+    w['sensorsDataAnalytic201505'] = n;
+    w[n] = w[n] || function(a) {return function() {(w[n]._q = w[n]._q || []).push([a, arguments]);}};
+    var ifs = ['track','quick','register','registerPage','registerOnce','trackSignup', 'trackAbtest', 'setProfile','setOnceProfile','appendProfile', 'incrementProfile', 'deleteProfile', 'unsetProfile', 'identify','login','logout','trackLink','clearAllRegister','getAppStatus'];
+    for (var i = 0; i < ifs.length; i++) {
+      w[n][ifs[i]] = w[n].call(null, ifs[i]);
+    }
+    if (!w[n]._t) {
+      x = d.createElement(s), y = d.getElementsByTagName(s)[0];
+      x.async = 1;
+      x.src = p;
+      x.setAttribute('charset','UTF-8');
+      w[n].para = para;
+      y.parentNode.insertBefore(x, y);
+    }
+  })({
+  sdk_url: './sensorsdata.full.js',
+  heatmap_url: './heatmap.full.js',
+  name: 'sesors',
+  server_url: 'http://test-syg.datasink.sensorsdata.cn/sa?token=27f1e21b78daf376&project=jiangwenwen',
+  use_app_track: true,
+  //use_app_track_is_send: 0,
+  heatmap:{
+    clickmap:'default',
+    scroll_notice_map:'default',
+    loadTimeout:  3000,
+    //collect_elements: "all"
+  },
+  //batch_send:true,
+  source_channel:['lixiang','kkkkk','jjjj'],
+  //send_type:'beacon',
+  //use_app_track:true,
+  //max_string_length:1000,
+});
   </script>
-  <script src="./sensorsdata.full.js"></script>
   <script src="./index.js"></script>
   <script>
     sensors.modules.cross_domain.init(sensors, [
