@@ -46,16 +46,14 @@ crossDomain.getPartHash = function(part) {
 };
 
 crossDomain.getCurrenId = function() {
-  var that = this;
-  var distinct_id = that.store.getDistinctId() || '',
-      first_id = that.store.getFirstId() || '';
+  var distinct_id = this.store.getDistinctId() || '',
+      first_id = this.store.getFirstId() || '';
   var urlId = first_id ? 'u' + distinct_id : 'a' + distinct_id;
   return encodeURIComponent(urlId);
 };
 
 
 crossDomain.rewireteUrl = function(url, target) {
-  var that = this;
   var reg = /([^?#]+)(\?[^#]*)?(#.*)?/;
   var arr = reg.exec(url),
       nurl = '';
@@ -66,22 +64,22 @@ crossDomain.rewireteUrl = function(url, target) {
       search = arr[2] || '',
       hash = arr[3] || '';
       var idIndex;
-  if(that.getPartHash(url)) {
+  if(this.getPartHash(url)) {
     idIndex = hash.indexOf('_sa_sdk');
     var queryIndex = hash.indexOf('?');
     if(queryIndex > -1) {
       if(idIndex > -1) {
-        nurl = host + search + '#' + hash.substring(1, idIndex) + '_sa_sdk=' + that.getCurrenId();
+        nurl = host + search + '#' + hash.substring(1, idIndex) + '_sa_sdk=' + this.getCurrenId();
       } else {
-        nurl = host + search + '#' + hash.substring(1) + '&_sa_sdk=' + that.getCurrenId();
+        nurl = host + search + '#' + hash.substring(1) + '&_sa_sdk=' + this.getCurrenId();
       }
     } else {
-      nurl = host + search + '#' + hash.substring(1) + '?_sa_sdk=' + that.getCurrenId();
+      nurl = host + search + '#' + hash.substring(1) + '?_sa_sdk=' + this.getCurrenId();
     }
   } else {
     idIndex = search.indexOf('_sa_sdk');
     if(idIndex > -1) {
-      nurl = host + '?' + search.substring(1, idIndex) + '_sa_sdk=' + that.getCurrenId() + hash;
+      nurl = host + '?' + search.substring(1, idIndex) + '_sa_sdk=' + this.getCurrenId() + hash;
     } else {
       nurl = host + '?' + search.substring(1) + '&_sa_sdk=' + that.getCurrenId() + hash;
     }
@@ -93,48 +91,30 @@ crossDomain.rewireteUrl = function(url, target) {
   return nurl;
 };
 
-crossDomain.isSameDomain = function(url) {
-  var that = this;
-  var topDomain = that._.getCookieTopLevelDomain().substring(1);
-  var href = window.location.href;
-  var host = that._.getHostname(href);
-  if(that.para.cross_subdomain) {
-    return url.indexOf(topDomain) > -1 ? true : false;
-  } else {
-    return url.indexOf(host) > -1 ? true : false;
-  }
-};
-
 crossDomain.getUrlId = function() {
-  var that = this;
-  var location = document.location,
-      search = location.search.split('?')[1] || '',
-      hash = location.hash.split('?')[1] || '';
-  var searchId = that.getUrlValue(search, '_sa_sdk') || '',
-      hashId = that.getUrlValue(hash, '_sa_sdk') || '';
-  return searchId ? decodeURIComponent(searchId) : decodeURIComponent(hashId);
-};
-
-crossDomain.getUrlValue = function(target, key) {
-  var param = target.split('&');
-  for(var i=0,len = param.length; i < len; i++) {
-    var tep = param[i].split('=');
-    if(tep[0] === key) {
-      return tep[1];
-    }
+  var sa_id = location.href.match(/_sa_sdk=([au][^\?\#\&\=]+)/);
+  if(this._.isArray(sa_id) && sa_id[1]){
+    return decodeURIComponent(sa_id[1]);
+  }else{
+    return '';
   }
 };
 
 crossDomain.setRefferId = function() {
-  var that = this;
-  var distinct_id = that.store.getDistinctId();
-  var isAnonymousId = that.getUrlId().substring(0,1) === 'a',
-      urlId = that.getUrlId().substring(1);
-  if(urlId === distinct_id) {
-    return;
+  var distinct_id = this.store.getDistinctId();
+  var urlId = this.getUrlId();
+  if(urlId === ''){
+    return false;
   }
-  if(urlId && isAnonymousId && that.store.getFirstId()) {
-    that._.saEvent.send({
+  var isAnonymousId = urlId.substring(0,1) === 'a';
+  urlId = urlId.substring(1);
+
+  if(urlId === distinct_id) {
+    return false;
+  }
+  if(urlId && isAnonymousId && this.store.getFirstId()) {
+    this.sd.identify(urlId, true);
+    this.sd.saEvent.send({
       original_id: urlId,
       distinct_id: distinct_id,
       type: 'track_signup',
@@ -142,21 +122,21 @@ crossDomain.setRefferId = function() {
       properties: {}
     }, null);
   }
-  if(urlId && isAnonymousId && !that.store.getFirstId()) {
-    that.sd.identify(urlId, true);
+  if(urlId && isAnonymousId && !this.store.getFirstId()) {
+    this.sd.identify(urlId, true);
   }
-  if(urlId && !isAnonymousId && !that.store.getFirstId()) {
-    that.sd.login(urlId);
+  if(urlId && !isAnonymousId && !this.store.getFirstId()) {
+    this.sd.login(urlId);
   }
 };
 
 crossDomain.addListen = function() {
   var that = this;
   that._.addEvent(document, 'mousedown', function(event){
-    var target = event.target || event.srcElement || {};
+    var target = event.target;
     var nodeName = target.tagName;
     if(nodeName.toLowerCase() === "a" && target.href) {
-      var location = new URL(target.href);
+      var location = that._.URL(target.href);
       var protocol = location.protocol;
       if(protocol === 'http:' || protocol === 'https:') {
         if(that.getPart(target.href)) {
@@ -172,23 +152,23 @@ crossDomain.init = function(sd, option) {
   this._ = sd._;
   this.store = sd.store;
   this.para = sd.para;
-  this.option = option;
-  if(this._.isArray(this.option) && this.option.length > 0) {
+  this.option = option.linker;
+  if(this._.isObject(option) && this._.isArray(option.linker) && option.linker.length > 0) {
     this.setRefferId();
     this.addListen();
   } else {
     sd.log('请配置打通域名参数！');
     return;
   }
-  resolveOption(option);
+  resolveOption(this.option);
   function resolveOption(option) {
     var len = option.length,
         arr = [];
     for(var i = 0; i < len; i++) {
-      if(option[i]['part_url'] && option[i].hasOwnProperty('after_hash')) {
+      if(/[A-Za-z0-9]+\./.test(option[i].part_url) && toString.call(option[i].after_hash) == '[object Boolean]') {
         arr.push(option[i]);
       } else {
-        sd.log('配置的 url 格式不对，请检查参数格式！');
+        sd.log('linker 配置的第 ' + (i + 1) + ' 项格式不正确，请检查参数格式！');
       }
     }
     option = arr;

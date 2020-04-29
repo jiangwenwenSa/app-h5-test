@@ -26,13 +26,14 @@
     });
   </script>
   <script src="./sensorsdata.full.js"></script>
-  <script src="./index.js"></script>
   <script>
-    sensors.modules.cross_domain.init(sensors, [
-      { part_url: 'http://www.jww.com:8080/index.html', after_hash: true },
-      { part_url: 'jiangwenwensa.github.io', after_hash: true },
-      { part_url: 'jssdk.debugbox', after_hash: false }
-    ]);
+    sensors.use('domain_linker', {
+    linker: [
+      {'part_url': 'http://www.jww.com:8080/index.html', 'after_hash': true },
+      {'part_url': 'jiangwenwensa.github.io', 'after_hash': true}, 
+      {part_url: 'jssdk.debugbox', after_hash: false}
+    ]
+  })
     sensors.quick('autoTrack');
   </script>
   <script>

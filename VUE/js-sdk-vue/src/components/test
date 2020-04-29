@@ -1,0 +1,30 @@
+import sensors from 'sa-sdk-javascript';
+sensors.init({
+  heatmap_url: 'https://cdn.jsdelivr.net/npm/sa-sdk-javascript@1.14.12/heatmap.min.js',
+  name: 'sensors',
+  //单页面切换页面pageview事件添加属性
+  is_track_single_page:()=>{
+    console.log('aa')
+    return {
+      custom_name:'aaa'
+    }
+  },
+  server_url: 'http://test-syg.datasink.sensorsdata.cn/sa?token=27f1e21b78daf376&project=jiangyanyun',
+  preset_properties: {
+    //是否采集$latest_utm最近一次广告系列相关参数，默认值true
+    latest_utm:true,
+    //是否采集$latest_traffic_source_type最近一次流量来源类型，默认值true
+    latest_traffic_source_type:true,
+    //是否采集$latest_search_keyword最近一次搜索引擎关键字，默认值true
+    latest_search_keyword:true,
+    //是否采集$latest_referrer最近一次前向地址，默认值true
+    latest_referrer:true,
+    //是否采集$latest_referrer_host最近一次前向地址，1.14.8以下版本默认是true，1.14.8及以上版本默认是false，需要手动设置为true开启
+    latest_referrer_host:true,
+    //是否采集$latest_landing_page最近一次落地页地址，默认值false
+    latest_landing_page:true,
+    //是否采集 $url 页面地址作为公共属性，默认值false
+    url: true,
+    title: true
+}
+});
