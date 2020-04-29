@@ -173,13 +173,14 @@ crossDomain.init = function(sd, option) {
   this.store = sd.store;
   this.para = sd.para;
   this.option = option;
-  resolveOption(option);
   if(this._.isArray(this.option) && this.option.length > 0) {
     this.setRefferId();
     this.addListen();
   } else {
-    sd.log('part_url 配置不正确，请重新配置 part_url！');
+    sd.log('请配置打通域名参数！');
+    return;
   }
+  resolveOption(option);
   function resolveOption(option) {
     var len = option.length,
         arr = [];
