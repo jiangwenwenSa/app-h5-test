@@ -25,15 +25,15 @@
       }
     });
   </script>
-  <script src="./sensors.min.js"></script>
+  <script src="./sensors.js"></script>
   <script>
-  sensors.use('domain_linker', {
-    linker: [
-    {'part_url': 'http://www.jww.com:8080/index.html', 'after_hash': true },
-      {'part_url': 'github.io', 'after_hash': true}, 
+    sensors.quick('useModulePlugin','SiteLinker',
+    {linker: [
+      {part_url: 'http://www.jww.com:8080/index.html', after_hash: false },
+      {part_url: 'github.io', after_hash: false}, 
       {part_url: 'jssdk.debugbox', after_hash: false}
-    ]
-  });
+    ]}
+)
   </script>
   <script>
     sensors.quick('autoTrack');
