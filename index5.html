@@ -6,26 +6,17 @@
   <meta http-equiv="Content-Type" content="charset=UTF-8">
 
   <title>跨域打通 测试</title>
+  <script src="./sensorsdata.js"></script>
   <script>
-    (function (para) {
-      if (typeof (window['sensorsDataAnalytic201505']) !== 'undefined') {
-        return false;
-      }
-      window['sensorsDataAnalytic201505'] = para.name;
-      window[para.name] = {
-        para: para
-      };
-    })({
-      name: 'sensors',
-      server_url: 'http://test-syg.datasink.sensorsdata.cn/sa?token=27f1e21b78daf376&project=jiangwenwen',
-      heatmap_url: "https://cdn.jsdelivr.net/npm/sa-sdk-javascript@1.14.24/heatmap.min.js",
-      heatmap: {
-        clickmap: 'default',
-        scroll_notice_map: 'default'
-      }
+    var sensors = window['sensorsDataAnalytic201505'];
+    sensors.init({
+        sdk_url: './sensorsdata.js',
+        heatmap_url: 'https://cdn.jsdelivr.net/npm/sa-sdk-javascript@1.15.1/heatmap.min.js',
+        name: 'sensors',
+        server_url: 'http://test-syg.datasink.sensorsdata.cn/sa?token=27f1e21b78daf376&project=jiangwenwen',
+        heatmap:{scroll_notice_map:'default'}
     });
   </script>
-  <script src="./sensorsdata.js"></script>
   <script>
     sensors.quick('useModulePlugin','SiteLinker',
     {linker: [
