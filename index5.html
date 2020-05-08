@@ -7,20 +7,8 @@
 
   <title>github.io 域名</title>
  
- 
  <script>
-// 	var sensors = window['sensorsDataAnalytic201505'];
-// 	sensors.init({
-//     	sdk_url: './sensorsdata.min.js',
-//   		heatmap_url: 'https://cdn.jsdelivr.net/npm/sa-sdk-javascript@1.15.4/heatmap.min.js',
-//   		server_url: 'http://test-syg.datasink.sensorsdata.cn/sa?token=27f1e21b78daf376&project=jiangwenwen',
-//       heatmap: {
-//         clickmap: 'default',
-//         scroll_notice_map: 'not_collect'
-//       }
-// 	});
-// 	sensors.quick('autoTrack');
-	   (function (para) {
+(function (para) {
       var p = para.sdk_url, n = para.name, w = window, d = document, s = 'script', x = null, y = null;
       if (typeof (w['sensorsDataAnalytic201505']) !== 'undefined') {
         return false;
@@ -49,6 +37,7 @@
         scroll_notice_map: 'not_collect'
       }
     });
+sensors.quick('autoTrack');
 </script>
   <script>
     sensors.quick('useModulePlugin', 'SiteLinker',
