@@ -7,12 +7,12 @@
 
   <title>github.io 域名</title>
   
- <script src="./sensorsdata.min.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/sa-sdk-javascript@1.15.9/sensorsdata.min.js"></script>
  <script>
    var sensors = window['sensorsDataAnalytic201505'];
 	sensors.init({
     	sdk_url: './sensorsdata.min.js',
-  		heatmap_url: 'https://cdn.jsdelivr.net/npm/sa-sdk-javascript@1.15.4/heatmap.min.js',
+  		heatmap_url: 'https://cdn.jsdelivr.net/npm/sa-sdk-javascript@1.15.9/heatmap.min.js',
   		server_url: 'http://test-syg.datasink.sensorsdata.cn/sa?token=27f1e21b78daf376&project=jiangwenwen',
       heatmap: {
         clickmap: 'default',
@@ -20,17 +20,6 @@
       }   
 	});
 </script>
-  <script>
-    sensors.quick('useModulePlugin', 'SiteLinker',
-      {
-        linker: [
-          { part_url: 'github.io', after_hash: false },
-          { part_url: 'jww.com', after_hash: false }
-        ]
-      }
-    );
-    sensors.quick('autoTrack');
-  </script>
 </head>
 
 <body>
